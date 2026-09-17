@@ -1,7 +1,7 @@
 import * as vscode from "vscode";
 import { getWorkspaceInfo } from "../services/workspaceService";
 
-export class OverviewProvider implements vscode.TreeDataProvider<vscode.TreeItem> {
+export class OverviewProvider implements vscode.TreeDataProvider<vscode.TreeItem>, vscode.Disposable {
   private readonly emitter = new vscode.EventEmitter<void>();
 
   readonly onDidChangeTreeData = this.emitter.event;
@@ -22,5 +22,9 @@ export class OverviewProvider implements vscode.TreeDataProvider<vscode.TreeItem
     availableSoon.description = "Architecture Map · Dependency Graph · Codebase Q&A";
 
     return [repository, status, availableSoon];
+  }
+
+  dispose(): void {
+    this.emitter.dispose();
   }
 }
