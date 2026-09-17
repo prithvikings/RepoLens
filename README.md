@@ -4,9 +4,9 @@ RepoLens is a VS Code extension for understanding unfamiliar codebases.
 
 ## Current Status
 
-**Phase 0 — Foundation**
+**Phase 1 — Repository Scanner**
 
-The current release establishes the project structure and development workflow only. It does not yet analyze repositories or build a code graph.
+RepoLens can now scan an open workspace and report structural repository metadata including files, directories, language statistics, project ecosystems, package managers, frameworks, and important configuration files.
 
 ## Vision
 
@@ -19,30 +19,30 @@ Repository
     → AI-powered codebase understanding
 ```
 
-The long-term architecture separates a framework-independent core from VS Code integration and a richer React webview:
+The architecture keeps repository/domain logic independent from VS Code:
 
 ```text
-Repository
+VS Code Workspace
     ↓
-Repository Scanner
+WorkspaceService
     ↓
-Parser / AST Analysis
+RepositoryScanner
+    ├── file discovery
+    ├── language detection
+    ├── project/framework detection
+    └── configuration detection
     ↓
-Code Graph
+RepositoryMetadata
     ↓
-Context Retrieval
-    ↓
-AI Reasoning
-    ↓
-VS Code UI
+RepoLens Overview
 ```
 
 ## Project Structure
 
 ```text
 packages/
-├── core/       # Framework-independent domain types
-├── extension/  # VS Code API integration and activation
+├── core/       # Framework-independent scanner and domain models
+├── extension/  # VS Code API integration and UI providers
 └── webview/    # React/TypeScript webview foundation
 ```
 
@@ -72,29 +72,67 @@ Type-check all workspace packages:
 npm run type-check
 ```
 
-Open the repository in VS Code, then start **Run RepoLens Extension** from the Run and Debug view. The launch configuration uses the standard VS Code extension development host.
+Run scanner tests:
 
-Once launched, open a workspace and run **RepoLens: Open** from the Command Palette. The RepoLens Activity Bar view reports the workspace name and current foundation status. With no workspace open, RepoLens reports that state without failing.
+```bash
+npm test
+```
 
-## Scope of Phase 0
+Open the repository in VS Code and start **Run RepoLens Extension** from the Run and Debug view. The standard VS Code Extension Development Host will launch the extension.
+
+Open a workspace and run **RepoLens: Open** from the Command Palette. The RepoLens Activity Bar overview scans the workspace and displays the repository name, file and directory counts, detected languages, projects, package managers, and scan status.
+
+If no workspace is open, RepoLens reports that state without attempting a filesystem scan.
+
+## Detection Support
+
+### Languages
+
+TypeScript, JavaScript, Python, Java, Go, Rust, C++, C, C#, PHP, Ruby, Swift, Kotlin, Dart, HTML, CSS, SCSS, JSON, YAML, Markdown, and Shell.
+
+`.tsx` and `.jsx` are grouped under TypeScript and JavaScript respectively for consistent language statistics.
+
+### Project Types
+
+Node.js, Python, Rust, Go, Java, PHP, and Ruby. Multiple ecosystems can be reported for the same repository.
+
+### Package Managers
+
+npm, Yarn, pnpm, Bun, Cargo, Go modules, Composer, and Bundler when reliable repository markers are present.
+
+### Frameworks
+
+React, Next.js, Vue, Angular, Svelte, Express, NestJS, Django, Flask, and FastAPI using dependency/project metadata rather than source parsing.
+
+### Configuration
+
+Common package/build/runtime configuration files are recognized, including package manifests and lockfiles, TypeScript/build configs, Docker files, Python/Rust/Go/Java/PHP/Ruby manifests, `.env.example`, and individual files under `.github/`.
+
+Secret-bearing `.env`, `.env.local`, `.env.production`, and `.env.development` files are excluded from repository metadata.
+
+## Phase 1 Scope
 
 Implemented:
 
-- npm workspace monorepo foundation
-- strict TypeScript configuration
-- framework-independent graph domain types
-- VS Code extension manifest and activation entry point
-- RepoLens Activity Bar overview
-- minimal React webview foundation
-- VS Code extension development launch configuration
+- recursive repository file and directory discovery
+- conservative symlink handling
+- generated/dependency directory exclusions
+- extension-based language detection and file-count percentages
+- multi-ecosystem project detection
+- package manager detection from lockfiles
+- lightweight framework detection from dependency/configuration metadata
+- important configuration file discovery
+- scanner error handling that skips unreadable items and continues where practical
+- VS Code Overview integration
+- automated scanner tests using temporary fixture repositories
 
 Intentionally not implemented:
 
-- AST parsing
-- repository indexing
-- dependency or code graph generation
+- AST parsing or symbol extraction
+- Tree-sitter or TypeScript Compiler API analysis
+- import, call, dependency, or architecture graphs
 - graph visualization
+- repository indexing or file watchers
 - semantic search, embeddings, RAG, or vector storage
 - LLM/AI integrations or chat
-- automatic architecture detection
-- multi-language parsing
+- code explanations or impact analysis
