@@ -58,9 +58,9 @@ export class TypeScriptSourceAnalyzer implements SourceAnalyzer {
         true,
         scriptKindFor(file.extension ?? ""),
       );
-      const diagnostics = sourceFile.getSyntacticDiagnostics();
-      if (diagnostics.length > 0) {
-        const message = diagnostics.map((diagnostic) => formatDiagnostic(diagnostic, sourceFile)).join("; ");
+      const parseDiagnostics = (sourceFile as ts.SourceFile & { parseDiagnostics: readonly ts.Diagnostic[] }).parseDiagnostics;
+      if (parseDiagnostics.length > 0) {
+        const message = parseDiagnostics.map((diagnostic) => formatDiagnostic(diagnostic, sourceFile)).join("; ");
         this.logger.warn(`Unable to analyze ${file.relativePath}: ${message}`);
         return { filePath: file.relativePath, language, symbols: [], imports: [], exports: [], error: message };
       }
@@ -134,7 +134,7 @@ function symbolFromNode(node: ts.Node, sourceFile: ts.SourceFile, filePath: stri
     filePath,
     line: line + 1,
     column: character + 1,
-    exported: hasExportModifier(node) || isExportedVariable(node),
+    exported: hasExportModifier(node) || (ts.isVariableDeclaration(node) && isExportedVariable(node)),
   };
 }
 
