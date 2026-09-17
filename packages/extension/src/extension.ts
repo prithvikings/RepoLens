@@ -1,14 +1,11 @@
 import * as vscode from "vscode";
-import { registerOpenCommand } from "./commands/openCommand";
-import { OverviewProvider } from "./providers/overviewProvider";
+import { registerOpenCommand } from "./commands/openCommand.js";
+import { OverviewProvider } from "./providers/overviewProvider.js";
 
 export function activate(context: vscode.ExtensionContext): void {
-  const openCommand = registerOpenCommand(context);
   const overviewProvider = new OverviewProvider();
-  const overviewView = vscode.window.registerTreeDataProvider(
-    "repolens.overview",
-    overviewProvider,
-  );
+  const openCommand = registerOpenCommand(context, overviewProvider);
+  const overviewView = vscode.window.registerTreeDataProvider("repolens.overview", overviewProvider);
 
   context.subscriptions.push(openCommand, overviewView, overviewProvider);
 }

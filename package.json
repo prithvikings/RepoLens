@@ -3,12 +3,10 @@
   "version": "0.1.0",
   "private": true,
   "description": "RepoLens VS Code extension monorepo",
-  "workspaces": [
-    "packages/*"
-  ],
+  "workspaces": ["packages/*"],
   "scripts": {
     "build": "npm run build --workspaces --if-present",
-    "type-check": "npm run type-check --workspaces --if-present",
+    "type-check": "npm run build --workspace=@repolens/core && npm run type-check --workspaces --if-present",
     "lint": "npm run lint --workspaces --if-present",
     "test": "npm run test --workspaces --if-present"
   },
