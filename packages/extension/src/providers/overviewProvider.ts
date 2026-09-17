@@ -3,7 +3,7 @@ import type { RepositoryMetadata } from "@repolens/core";
 import { getWorkspaceInfo } from "../services/workspaceService.js";
 import { RepositoryScanService } from "../services/repositoryScanService.js";
 
-export class OverviewProvider implements vscode.TreeDataProvider<vscode.TreeItem> {
+export class OverviewProvider implements vscode.TreeDataProvider<vscode.TreeItem>, vscode.Disposable {
   private readonly emitter = new vscode.EventEmitter<void>();
   private readonly scanService = new RepositoryScanService();
   private metadata: RepositoryMetadata | undefined;
@@ -55,6 +55,10 @@ export class OverviewProvider implements vscode.TreeDataProvider<vscode.TreeItem
     this.error = undefined;
     if (workspace) await this.scan(workspace.rootPath.fsPath);
     this.emitter.fire();
+  }
+
+  public dispose(): void {
+    this.emitter.dispose();
   }
 
   private async scan(rootPath: string): Promise<void> {
