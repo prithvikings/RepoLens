@@ -58,7 +58,7 @@ export class TypeScriptSourceAnalyzer implements SourceAnalyzer {
         true,
         scriptKindFor(file.extension ?? ""),
       );
-      const parseDiagnostics = sourceFile.parseDiagnostics;
+      const parseDiagnostics = (sourceFile as ts.SourceFile & { parseDiagnostics: readonly ts.Diagnostic[] }).parseDiagnostics;
       if (parseDiagnostics.length > 0) {
         const message = parseDiagnostics.map((diagnostic) => formatDiagnostic(diagnostic, sourceFile)).join("; ");
         this.logger.warn(`Unable to analyze ${file.relativePath}: ${message}`);
