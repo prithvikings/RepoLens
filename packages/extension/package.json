@@ -43,7 +43,8 @@
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "type-check": "tsc -p tsconfig.json --noEmit",
-    "lint": "tsc -p tsconfig.json --noEmit"
+    "lint": "tsc -p tsconfig.json --noEmit",
+    "test": "npm run build && node --test dist/__tests__"
   },
   "dependencies": {
     "@repolens/core": "0.1.0"
