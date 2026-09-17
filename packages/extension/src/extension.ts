@@ -1,19 +1,9 @@
 import * as vscode from "vscode";
+import { registerOpenCommand } from "./commands/openCommand";
 import { OverviewProvider } from "./providers/overviewProvider";
-import { getWorkspaceInfo } from "./services/workspaceService";
 
 export function activate(context: vscode.ExtensionContext): void {
-  const openCommand = vscode.commands.registerCommand("repolens.open", () => {
-    const workspace = getWorkspaceInfo();
-
-    if (!workspace) {
-      vscode.window.showInformationMessage("RepoLens is ready. Open a workspace to inspect a repository.");
-      return;
-    }
-
-    vscode.window.showInformationMessage(`RepoLens is ready for ${workspace.name}.`);
-  });
-
+  const openCommand = registerOpenCommand(context);
   const overviewProvider = new OverviewProvider();
   const overviewView = vscode.window.registerTreeDataProvider(
     "repolens.overview",
