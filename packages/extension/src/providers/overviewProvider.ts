@@ -2,6 +2,11 @@ import * as vscode from "vscode";
 import type { RepositoryMetadata } from "@repolens/core";
 import { getWorkspaceInfo } from "../services/workspaceService.js";
 import { RepositoryScanService } from "../services/repositoryScanService.js";
+import {
+  formatConfigurationFiles,
+  formatFrameworks,
+  formatLanguageStatistics,
+} from "../services/overviewMetadata.js";
 
 export class OverviewProvider implements vscode.TreeDataProvider<vscode.TreeItem>, vscode.Disposable {
   private readonly emitter = new vscode.EventEmitter<void>();
@@ -30,11 +35,8 @@ export class OverviewProvider implements vscode.TreeDataProvider<vscode.TreeItem
     const metadata = this.metadata;
     if (!metadata) return [this.item("Status", "Scanning…")];
 
-    const languages = metadata.languages.length
-      ? metadata.languages.map(({ language }) => language).join(" · ")
-      : "None detected";
     const projects = metadata.projects.length
-      ? metadata.projects.map(({ type }) => type).join(" · ")
+      ? [...new Set(metadata.projects.map(({ type }) => type))].join(" · ")
       : "None detected";
     const packageManagers = [...new Set(metadata.projects.map(({ packageManager }) => packageManager).filter(Boolean))].join(" · ") || "Not detected";
 
@@ -42,9 +44,11 @@ export class OverviewProvider implements vscode.TreeDataProvider<vscode.TreeItem
       this.item("Repository", metadata.name),
       this.item("Files", String(metadata.files.length)),
       this.item("Directories", String(metadata.directories.length)),
-      this.item("Languages", languages),
+      this.item("Languages", formatLanguageStatistics(metadata.languages)),
       this.item("Projects", projects),
+      this.item("Frameworks", formatFrameworks(metadata.projects)),
       this.item("Package Manager", packageManagers),
+      this.item("Configuration", formatConfigurationFiles(metadata.configFiles)),
       this.item("Status", "Scanned"),
     ];
   }
