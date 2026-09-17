@@ -1,0 +1,54 @@
+{
+  "name": "repolens-extension",
+  "displayName": "RepoLens",
+  "description": "Understand unfamiliar codebases from inside VS Code.",
+  "version": "0.1.0",
+  "private": true,
+  "publisher": "prithvikings",
+  "engines": {
+    "vscode": "^1.90.0"
+  },
+  "categories": ["Other"],
+  "activationEvents": [
+    "onCommand:repolens.open"
+  ],
+  "main": "./dist/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "repolens.open",
+        "title": "RepoLens: Open"
+      }
+    ],
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "repolens",
+          "title": "RepoLens",
+          "icon": "media/repolens.svg"
+        }
+      ]
+    },
+    "views": {
+      "repolens": [
+        {
+          "id": "repolens.overview",
+          "name": "Overview"
+        }
+      ]
+    }
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "type-check": "tsc -p tsconfig.json --noEmit",
+    "lint": "tsc -p tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "@repolens/core": "0.1.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "@types/vscode": "^1.90.0",
+    "typescript": "^5.0.0"
+  }
+}
