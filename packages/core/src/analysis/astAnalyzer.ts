@@ -1,5 +1,5 @@
 import { promises as fs } from "node:fs";
-import ts from "typescript";
+import * as ts from "typescript";
 import type { RepositoryFile } from "../types/repository.js";
 import type {
   CodeSymbol,
