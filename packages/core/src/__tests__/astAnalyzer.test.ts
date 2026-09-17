@@ -1,4 +1,4 @@
-import { mkdtemp, rm, writeFile } from "node:fs/promises";
+import { mkdir, mkdtemp, rm, writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import test from "node:test";
@@ -12,6 +12,7 @@ async function withFiles(files: Record<string, string>): Promise<{ root: string;
 
   for (const [relativePath, content] of Object.entries(files)) {
     const filePath = path.join(root, relativePath);
+    await mkdir(path.dirname(filePath), { recursive: true });
     await writeFile(filePath, content, "utf8");
     repositoryFiles.push({
       path: filePath,
