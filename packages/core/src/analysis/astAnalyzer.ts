@@ -68,7 +68,7 @@ export class TypeScriptSourceAnalyzer implements SourceAnalyzer {
       return {
         filePath: file.relativePath,
         language,
-        symbols: extractSymbols(sourceFile),
+        symbols: extractSymbols(sourceFile, file.relativePath),
         imports: extractImports(sourceFile),
         exports: extractExports(sourceFile),
       };
@@ -80,10 +80,10 @@ export class TypeScriptSourceAnalyzer implements SourceAnalyzer {
   }
 }
 
-function extractSymbols(sourceFile: ts.SourceFile): CodeSymbol[] {
+function extractSymbols(sourceFile: ts.SourceFile, filePath: string): CodeSymbol[] {
   const symbols: CodeSymbol[] = [];
   const visit = (node: ts.Node): void => {
-    const symbol = symbolFromNode(node, sourceFile);
+    const symbol = symbolFromNode(node, sourceFile, filePath);
     if (symbol) symbols.push(symbol);
     ts.forEachChild(node, visit);
   };
@@ -92,7 +92,7 @@ function extractSymbols(sourceFile: ts.SourceFile): CodeSymbol[] {
   return symbols;
 }
 
-function symbolFromNode(node: ts.Node, sourceFile: ts.SourceFile): CodeSymbol | undefined {
+function symbolFromNode(node: ts.Node, sourceFile: ts.SourceFile, filePath: string): CodeSymbol | undefined {
   let name: string | undefined;
   let kind: SymbolKind | undefined;
 
@@ -131,10 +131,10 @@ function symbolFromNode(node: ts.Node, sourceFile: ts.SourceFile): CodeSymbol | 
   return {
     name,
     kind,
-    filePath: sourceFile.fileName,
+    filePath,
     line: line + 1,
     column: character + 1,
-    exported: hasExportModifier(node),
+    exported: hasExportModifier(node) || isExportedVariable(node),
   };
 }
 
@@ -208,14 +208,20 @@ function declarationExportName(statement: ts.Statement): string | undefined {
     return statement.name?.text;
   }
   if (ts.isVariableStatement(statement)) {
-    const declarations = statement.declarationList.declarations.filter((declaration) => ts.isIdentifier(declaration.name));
-    return declarations.map((declaration) => (declaration.name as ts.Identifier).text).join(", ") || undefined;
+    const names = statement.declarationList.declarations
+      .filter((declaration) => ts.isIdentifier(declaration.name))
+      .map((declaration) => (declaration.name as ts.Identifier).text);
+    return names.join(", ") || undefined;
   }
   return undefined;
 }
 
 function hasExportModifier(node: ts.Node): boolean {
   return ts.canHaveModifiers(node) && ts.getModifiers(node)?.some((modifier) => modifier.kind === ts.SyntaxKind.ExportKeyword) === true;
+}
+
+function isExportedVariable(node: ts.VariableDeclaration): boolean {
+  return ts.isVariableStatement(node.parent.parent) && hasExportModifier(node.parent.parent);
 }
 
 function isFunctionInitializer(initializer: ts.Expression | undefined): boolean {
