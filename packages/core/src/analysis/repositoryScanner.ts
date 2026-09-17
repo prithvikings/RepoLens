@@ -139,7 +139,14 @@ export class FileRepositoryScanner implements RepositoryScanner {
     directories: RepositoryDirectory[],
     visitedDirectories: Set<string>,
   ): Promise<void> {
-    const realCurrentPath = await fs.realpath(currentPath);
+    let realCurrentPath: string;
+    try {
+      realCurrentPath = await fs.realpath(currentPath);
+    } catch (error) {
+      this.logger.warn(`Unable to resolve directory ${currentPath}: ${formatError(error)}`);
+      return;
+    }
+
     if (visitedDirectories.has(realCurrentPath)) return;
     visitedDirectories.add(realCurrentPath);
 
