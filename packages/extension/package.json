@@ -4,13 +4,15 @@
   "description": "Understand unfamiliar codebases from inside VS Code.",
   "version": "0.1.0",
   "private": true,
+  "type": "module",
   "publisher": "prithvikings",
   "engines": {
     "vscode": "^1.90.0"
   },
   "categories": ["Other"],
   "activationEvents": [
-    "onCommand:repolens.open"
+    "onCommand:repolens.open",
+    "onView:repolens.overview"
   ],
   "main": "./dist/extension.js",
   "contributes": {
