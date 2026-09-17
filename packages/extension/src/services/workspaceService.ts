@@ -7,9 +7,7 @@ export interface WorkspaceInfo {
 
 export function getWorkspaceInfo(): WorkspaceInfo | undefined {
   const folder = vscode.workspace.workspaceFolders?.[0];
-  if (!folder) {
-    return undefined;
-  }
+  if (!folder) return undefined;
 
   return {
     name: folder.name,
