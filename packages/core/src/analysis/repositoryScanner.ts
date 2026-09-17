@@ -117,7 +117,7 @@ export class FileRepositoryScanner implements RepositoryScanner {
 
     const publicFiles = files.map(({ absolutePath: _absolutePath, ...file }) => file);
     const languages = detectLanguageStatistics(publicFiles);
-    const projects = await detectProjects(absoluteRoot, files, this.logger);
+    const projects = await detectProjects(files, this.logger);
     const configFiles = detectConfigFiles(files);
 
     return {
@@ -217,12 +217,8 @@ export function detectLanguageStatistics(files: RepositoryFile[]): LanguageInfo[
     }));
 }
 
-async function detectProjects(
-  rootPath: string,
-  files: DiscoveredFile[],
-  logger: ScanLogger,
-): Promise<ProjectInfo[]> {
-  const names = new Set(files.map((file) => file.relativePath.split("/").pop()));
+async function detectProjects(files: DiscoveredFile[], logger: ScanLogger): Promise<ProjectInfo[]> {
+  const names = new Set(files.map((file) => file.name));
   const projects: ProjectInfo[] = [];
   const packageJsonFiles = files.filter((file) => file.name === "package.json");
 
@@ -238,7 +234,11 @@ async function detectProjects(
       }
     }
 
-    projects.push({ type: "Node.js", ...(frameworkNames.size ? { framework: [...frameworkNames].join(", ") } : {}), ...(packageManager ? { packageManager } : {}) });
+    projects.push({
+      type: "Node.js",
+      ...(frameworkNames.size ? { framework: [...frameworkNames].join(", ") } : {}),
+      ...(packageManager ? { packageManager } : {}),
+    });
   }
 
   if (["requirements.txt", "pyproject.toml", "Pipfile", "setup.py"].some((name) => names.has(name))) {
