@@ -26,6 +26,12 @@ export class ContextRetriever {
     }
   }
 
+  private addAdjacency(source: string, target: string, edge: CodeGraphEdge): void {
+    const entries = this.adjacency.get(source) ?? [];
+    entries.push({ nodeId: target, edge });
+    this.adjacency.set(source, entries);
+  }
+
   public retrieve(request: ContextRequest): ContextResult {
     const target = this.nodesById.get(request.targetId);
     if (!target) {
