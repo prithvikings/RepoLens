@@ -4,7 +4,7 @@ RepoLens is a VS Code extension for understanding unfamiliar codebases.
 
 ## Current Status
 
-**Phase 3 — Code Relationship Graph**
+**Phase 5 — AI Reasoning Boundary**
 
 RepoLens can scan a workspace, analyze TypeScript/JavaScript source structure, and build a deterministic in-memory code graph containing files, symbols, and repository-local import/export/containment relationships.
 
@@ -32,6 +32,12 @@ SourceFileAnalysis
 CodeGraphBuilder
     ↓
 CodeGraph
+    ↓
+ContextRetriever
+    ↓
+ReasoningProvider
+    ↓
+ReasoningResult
 
 ## Project Structure
 
@@ -176,3 +182,21 @@ Phase 4 adds a framework-independent deterministic context retrieval layer over 
 Results contain structured graph nodes/edges and the associated SourceFileAnalysis records for selected files. Retrieval supports caller-provided maxDepth and maxResults bounds, handles missing nodes without throwing, preserves malformed-source analysis errors, and sorts results deterministically.
 
 Phase 4 does not perform semantic search, type resolution, call/reference analysis, embeddings, RAG, prompt generation, LLM calls, persistence, caching, or UI integration.
+
+## AI Reasoning Boundary
+
+Phase 5 adds a small framework-independent reasoning boundary that consumes the structured ContextResult produced by Phase 4.
+
+The flow is:
+
+ContextRetriever
+    ↓
+ReasoningProvider
+    ↓
+ReasoningResult
+
+ReasoningRequest contains the user question and retrieved ContextResult. ReasoningProvider defines the reasoning abstraction, and ReasoningResult contains the resulting answer.
+
+Phase 5 currently provides DeterministicReasoningProvider, an offline deterministic implementation used to validate the boundary. It does not represent an actual LLM and makes no network calls. The provider consumes the structured context directly; it does not perform graph traversal.
+
+Real LLM integration, RAG, embeddings, semantic search, chat, streaming, persistence, and UI integration remain deferred.
