@@ -1,4 +1,5 @@
 import type { CodeGraphEdge, CodeGraphNode } from "./graph.js";
+import type { SourceFileAnalysis } from "./symbol.js";
 
 export type ContextRetrievalMode = "file" | "symbol" | "related" | "neighborhood";
 
@@ -14,4 +15,5 @@ export interface ContextResult {
   targetId: string;
   nodes: CodeGraphNode[];
   edges: CodeGraphEdge[];
+  analyses: SourceFileAnalysis[];
 }
