@@ -44,7 +44,7 @@
     "build": "tsc -p tsconfig.json",
     "type-check": "tsc -p tsconfig.json --noEmit",
     "lint": "tsc -p tsconfig.json --noEmit",
-    "test": "npm run build && node --test 'dist/__tests__/*.test.js'"
+    "test": "npm run build && node --test dist/__tests__/overviewMetadata.test.js dist/__tests__/overviewMetadataPhase2.test.js"
   },
   "dependencies": {
     "@repolens/core": "0.1.0"
