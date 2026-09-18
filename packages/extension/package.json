@@ -9,9 +9,7 @@
   "engines": {
     "vscode": "^1.90.0"
   },
-  "categories": [
-    "Other"
-  ],
+  "categories": ["Other"],
   "activationEvents": [
     "onCommand:repolens.open",
     "onCommand:repolens.askAboutCode",
