@@ -8,7 +8,7 @@
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "type-check": "tsc -p tsconfig.json --noEmit",
-    "test": "npm run build && node --test 'dist/__tests__/*.test.js'"
+    "test": "npm run build && node --test dist/__tests__/astAnalyzer.test.js dist/__tests__/astAnalyzerIntegration.test.js dist/__tests__/codeGraphBuilder.test.js dist/__tests__/repositoryScanner.test.js"
   },
   "devDependencies": {
     "@types/node": "^20.0.0",
