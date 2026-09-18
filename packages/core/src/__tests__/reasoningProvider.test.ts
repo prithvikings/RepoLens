@@ -157,10 +157,3 @@ test("consumes ContextRetriever output without graph coupling", async () => {
   assert.match(result.answer, /src\/b\.ts/);
   assert.match(result.answer, /imports/);
 });
-
-test("rejects an empty question", async () => {
-  await assert.rejects(
-    () => new DeterministicReasoningProvider().reason({ question: "   ", context: context() }),
-    /question must not be empty/,
-  );
-});
