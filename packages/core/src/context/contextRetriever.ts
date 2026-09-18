@@ -51,7 +51,7 @@ export class ContextRetriever {
         nodeIds = this.directContext(target, "symbol", maxResults);
         break;
       case "related":
-        nodeIds = this.relatedNodes(target.id, maxResults);
+        nodeIds = this.limitWithTarget(target.id, this.relatedNodes(target.id, Number.MAX_SAFE_INTEGER), maxResults);
         break;
       case "neighborhood":
         nodeIds = this.neighborhood(target.id, maxDepth, maxResults);
