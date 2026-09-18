@@ -156,6 +156,16 @@ test("parses JavaScript, JSX, TSX, and skips unsupported languages", async () =>
       { filePath: "component.tsx", language: "typescript" },
     ]);
     assert.ok(analyses.every(({ error }) => !error));
+
+    assert.deepEqual(analyses[0]?.symbols.map(({ name, kind, exported }) => ({ name, kind, exported })), [
+      { name: "run", kind: "function", exported: true },
+    ]);
+    assert.deepEqual(analyses[1]?.symbols.map(({ name, kind, exported }) => ({ name, kind, exported })), [
+      { name: "Component", kind: "function", exported: true },
+    ]);
+    assert.deepEqual(analyses[2]?.symbols.map(({ name, kind, exported }) => ({ name, kind, exported })), [
+      { name: "App", kind: "function", exported: true },
+    ]);
   } finally {
     await rm(root, { recursive: true, force: true });
   }
