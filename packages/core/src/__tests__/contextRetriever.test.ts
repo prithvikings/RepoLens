@@ -100,10 +100,16 @@ test("retrieves related nodes without inventing relationships", () => {
   assert.equal(result.found, true);
   assert.deepEqual(ids(result.nodes), [
     "file:src/a.ts",
+    "file:src/b.ts",
     "file:src/c.ts",
     "symbol:src/b.ts:function:B:1:1",
   ]);
-  assert.ok(result.edges.every(({ kind }) => ["contains", "imports"].includes(kind)));
+  assert.ok(result.edges.some(({ source, target, kind }) =>
+    source === "file:src/b.ts" && target === "file:src/a.ts" && kind === "imports",
+  ));
+  assert.ok(result.edges.some(({ source, target, kind }) =>
+    source === "file:src/b.ts" && target === "file:src/c.ts" && kind === "imports",
+  ));
 });
 
 test("retrieves a bounded graph neighborhood", () => {
