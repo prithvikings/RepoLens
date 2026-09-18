@@ -12,6 +12,7 @@
   "categories": ["Other"],
   "activationEvents": [
     "onCommand:repolens.open",
+    "onCommand:repolens.askAboutCode",
     "onView:repolens.overview"
   ],
   "main": "./dist/extension.js",
@@ -20,6 +21,10 @@
       {
         "command": "repolens.open",
         "title": "RepoLens: Open"
+      },
+      {
+        "command": "repolens.askAboutCode",
+        "title": "RepoLens: Ask About Code"
       }
     ],
     "viewsContainers": {
@@ -44,7 +49,7 @@
     "build": "tsc -p tsconfig.json",
     "type-check": "tsc -p tsconfig.json --noEmit",
     "lint": "tsc -p tsconfig.json --noEmit",
-    "test": "npm run build && node --test dist/__tests__/overviewMetadata.test.js dist/__tests__/overviewMetadataPhase2.test.js"
+    "test": "npm run build && node --test dist/__tests__/overviewMetadata.test.js dist/__tests__/overviewMetadataPhase2.test.js dist/__tests__/codeQuestionService.test.js dist/__tests__/askAboutCodeCommand.test.js"
   },
   "dependencies": {
     "@repolens/core": "0.1.0"
