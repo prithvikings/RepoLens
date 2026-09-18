@@ -7,7 +7,7 @@ export class ContextRetriever {
   private readonly adjacency = new Map<string, Array<{ nodeId: string; edge: CodeGraphEdge }>>();
   private readonly analysesByFile = new Map<string, SourceFileAnalysis>();
 
-  public constructor(graph: CodeGraph, analyses: SourceFileAnalysis[] = []) {
+  public constructor(graph: CodeGraph, analyses: SourceFileAnalysis[]) {
     for (const node of graph.nodes) {
       this.nodesById.set(node.id, node);
     }
@@ -18,7 +18,7 @@ export class ContextRetriever {
     }
 
     for (const analysis of analyses) {
-      this.analysesByFile.set(analysis.filePath, analysis);
+      this.analysesByFile.set(normalizePath(analysis.filePath), analysis);
     }
 
     for (const entries of this.adjacency.values()) {
@@ -34,11 +34,12 @@ export class ContextRetriever {
         targetId: request.targetId,
         nodes: [],
         edges: [],
+        analyses: [],
       };
     }
 
     const maxResults = normalizeLimit(request.maxResults);
-    const maxDepth = normalizeDepth(request.maxDepth, request.mode);
+    const maxDepth = normalizeDepth(request.maxDepth);
 
     let nodeIds: string[];
 
@@ -64,12 +65,18 @@ export class ContextRetriever {
       .sort((a, b) => a.id.localeCompare(b.id));
 
     const edges = this.edgesBetween(selected).sort((a, b) => a.id.localeCompare(b.id));
+    const analyses = nodes
+      .filter((node) => node.kind === "file")
+      .map((node) => this.analysesByFile.get(normalizePath(node.filePath)))
+      .filter((analysis): analysis is SourceFileAnalysis => analysis !== undefined)
+      .sort((a, b) => normalizePath(a.filePath).localeCompare(normalizePath(b.filePath)));
 
     return {
       found: true,
       targetId: target.id,
       nodes,
       edges,
+      analyses,
     };
   }
 
@@ -135,10 +142,23 @@ function normalizeLimit(value: number | undefined): number {
   return value;
 }
 
-function normalizeDepth(value: number | undefined, mode: ContextRequest["mode"]): number {
-  if (value === undefined) return mode === "neighborhood" ? 1 : 1;
+function normalizeDepth(value: number | undefined): number {
+  if (value === undefined) return 1;
   if (!Number.isInteger(value) || value < 0) {
     throw new RangeError("maxDepth must be a non-negative integer");
   }
   return value;
+}
+
+function normalizePath(value: string): string {
+  const segments: string[] = [];
+  for (const segment of value.replace(/\\/g, "/").split("/")) {
+    if (!segment || segment === ".") continue;
+    if (segment === "..") {
+      if (segments.length > 0) segments.pop();
+      continue;
+    }
+    segments.push(segment);
+  }
+  return segments.join("/");
 }
