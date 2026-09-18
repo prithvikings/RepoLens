@@ -1,32 +1,25 @@
-export type NodeType =
-  | "file"
-  | "directory"
-  | "module"
-  | "class"
-  | "function"
-  | "variable"
-  | "interface"
-  | "route";
+import type { SymbolKind } from "./symbol.js";
 
-export type EdgeType =
-  | "imports"
-  | "exports"
-  | "calls"
-  | "extends"
-  | "implements"
-  | "references"
-  | "contains";
+export type GraphNodeKind = "file" | "symbol";
 
-export interface GraphNode {
+export type GraphEdgeKind = "imports" | "exports" | "contains";
+
+export interface CodeGraphNode {
   id: string;
-  type: NodeType;
+  kind: GraphNodeKind;
   name: string;
-  path?: string;
+  filePath: string;
+  symbolKind?: SymbolKind;
 }
 
-export interface GraphEdge {
+export interface CodeGraphEdge {
   id: string;
   source: string;
   target: string;
-  type: EdgeType;
+  kind: GraphEdgeKind;
+}
+
+export interface CodeGraph {
+  nodes: CodeGraphNode[];
+  edges: CodeGraphEdge[];
 }

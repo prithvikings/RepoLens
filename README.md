@@ -4,47 +4,41 @@ RepoLens is a VS Code extension for understanding unfamiliar codebases.
 
 ## Current Status
 
-**Phase 1 — Repository Scanner**
+**Phase 3 — Code Relationship Graph**
 
-RepoLens can now scan an open workspace and report structural repository metadata including files, directories, language statistics, project ecosystems, package managers, frameworks, and important configuration files.
+RepoLens can scan a workspace, analyze TypeScript/JavaScript source structure, and build a deterministic in-memory code graph containing files, symbols, and repository-local import/export/containment relationships.
 
 ## Vision
 
-```text
 Repository
     → structural analysis
     → code graph
     → architecture visualization
     → dependency exploration
     → AI-powered codebase understanding
-```
 
 The architecture keeps repository/domain logic independent from VS Code:
 
-```text
 VS Code Workspace
     ↓
 WorkspaceService
     ↓
 RepositoryScanner
-    ├── file discovery
-    ├── language detection
-    ├── project/framework detection
-    └── configuration detection
     ↓
 RepositoryMetadata
     ↓
-RepoLens Overview
-```
+SourceFileAnalysis
+    ↓
+CodeGraphBuilder
+    ↓
+CodeGraph
 
 ## Project Structure
 
-```text
 packages/
-├── core/       # Framework-independent scanner and domain models
+├── core/       # Framework-independent scanner, analysis, graph, and domain models
 ├── extension/  # VS Code API integration and UI providers
 └── webview/    # React/TypeScript webview foundation
-```
 
 ## Development
 
@@ -72,7 +66,7 @@ Type-check all workspace packages:
 npm run type-check
 ```
 
-Run scanner tests:
+Run tests:
 
 ```bash
 npm test
@@ -80,9 +74,7 @@ npm test
 
 Open the repository in VS Code and start **Run RepoLens Extension** from the Run and Debug view. The standard VS Code Extension Development Host will launch the extension.
 
-Open a workspace and run **RepoLens: Open** from the Command Palette. The RepoLens Activity Bar overview scans the workspace and displays the repository name, file and directory counts, detected languages, projects, package managers, and scan status.
-
-If no workspace is open, RepoLens reports that state without attempting a filesystem scan.
+Open a workspace and run **RepoLens: Open** from the Command Palette. The RepoLens Activity Bar overview scans the workspace and displays repository metadata and Phase 2 analysis summaries.
 
 ## Detection Support
 
@@ -106,13 +98,40 @@ React, Next.js, Vue, Angular, Svelte, Express, NestJS, Django, Flask, and FastAP
 
 ### Configuration
 
-Common package/build/runtime configuration files are recognized, including package manifests and lockfiles, TypeScript/build configs, Docker files, Python/Rust/Go/Java/PHP/Ruby manifests, `.env.example`, and individual files under `.github/`.
+Common package/build/runtime configuration files are recognized, including package manifests and lockfiles, TypeScript/build configs, Docker files, Python/Rust/Go/Java/PHP/Ruby manifests, .env.example, and individual files under .github/.
 
-Secret-bearing `.env`, `.env.local`, `.env.production`, and `.env.development` files are excluded from repository metadata.
+Secret-bearing .env, .env.local, .env.production, and .env.development files are excluded from repository metadata.
 
-## Phase 1 Scope
+## Code Graph
 
-Implemented:
+Phase 3 adds a small framework-independent in-memory graph.
+
+### Nodes
+
+- file — a repository-relative source file participating in Phase 2 analysis.
+- symbol — a symbol extracted by the Phase 2 AST analyzer.
+
+### Edges
+
+- contains — connects a file to its extracted symbols.
+- imports — connects a file to a repository-local imported source file.
+- exports — connects a file to an exported symbol.
+
+### Determinism
+
+File IDs use normalized repository-relative paths. Symbol IDs include the path, symbol kind, name, and source location. Edge IDs are derived from relationship kind and endpoint IDs. Graph output is sorted and de-duplicated.
+
+### Local imports
+
+Only relative imports are resolved. The builder checks actual analyzed repository files using .ts, .tsx, .js, and .jsx candidates, including index files. External imports are ignored and never become fake repository nodes.
+
+### Limitations
+
+The graph currently does not perform TypeScript type resolution, call/reference analysis, package dependency resolution, persistence, visualization, or AI/LLM processing.
+
+## Phase 1 and Phase 2 Scope
+
+Phase 1 implemented:
 
 - recursive repository file and directory discovery
 - conservative symlink handling
@@ -124,15 +143,21 @@ Implemented:
 - important configuration file discovery
 - scanner error handling that skips unreadable items and continues where practical
 - VS Code Overview integration
-- automated scanner tests using temporary fixture repositories
 
-Intentionally not implemented:
+Phase 2 implemented:
 
-- AST parsing or symbol extraction
-- Tree-sitter or TypeScript Compiler API analysis
-- import, call, dependency, or architecture graphs
+- TypeScript Compiler API parsing
+- TypeScript and JavaScript source support
+- functions, arrow functions, classes, interfaces, type aliases, methods, properties, constructors, variables, and enums
+- import and export extraction
+- source locations and export status
+- malformed-file isolation
+- Phase 2 AST and scanner integration tests
+
+Intentionally deferred:
+
 - graph visualization
 - repository indexing or file watchers
 - semantic search, embeddings, RAG, or vector storage
 - LLM/AI integrations or chat
-- code explanations or impact analysis
+- call graphs, semantic references, full type resolution, and cross-package semantic resolution
