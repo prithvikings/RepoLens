@@ -161,3 +161,18 @@ Intentionally deferred:
 - semantic search, embeddings, RAG, or vector storage
 - LLM/AI integrations or chat
 - call graphs, semantic references, full type resolution, and cross-package semantic resolution
+
+## Context Retrieval
+
+Phase 4 adds a framework-independent deterministic context retrieval layer over the Phase 3 graph and Phase 2 source analyses.
+
+### Retrieval
+
+- file context — returns the target file plus directly related symbols/files and relationships.
+- symbol context — returns a symbol with its directly related graph context, including its containing file.
+- related context — returns one-hop related nodes using only existing graph edges.
+- neighborhood context — performs bounded multi-hop traversal over existing relationships.
+
+Results contain structured graph nodes/edges and the associated SourceFileAnalysis records for selected files. Retrieval supports caller-provided maxDepth and maxResults bounds, handles missing nodes without throwing, preserves malformed-source analysis errors, and sorts results deterministically.
+
+Phase 4 does not perform semantic search, type resolution, call/reference analysis, embeddings, RAG, prompt generation, LLM calls, persistence, caching, or UI integration.
