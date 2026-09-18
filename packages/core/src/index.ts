@@ -40,3 +40,9 @@ export type {
   ContextRetrievalMode,
 } from "./types/context.js";
 export { ContextRetriever } from "./context/contextRetriever.js";
+export type {
+  ReasoningProvider,
+  ReasoningRequest,
+  ReasoningResult,
+} from "./reasoning/reasoning.js";
+export { DeterministicReasoningProvider } from "./reasoning/deterministicReasoningProvider.js";
