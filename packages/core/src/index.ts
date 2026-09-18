@@ -1,4 +1,10 @@
-export type { EdgeType, GraphEdge, GraphNode, NodeType } from "./types/graph.js";
+export type {
+  CodeGraph,
+  CodeGraphEdge,
+  CodeGraphNode,
+  GraphEdgeKind,
+  GraphNodeKind,
+} from "./types/graph.js";
 export type {
   LanguageInfo,
   ProjectInfo,
@@ -27,3 +33,4 @@ export {
   type SourceAnalyzer,
   type SourceAnalysisLogger,
 } from "./analysis/astAnalyzer.js";
+export { CodeGraphBuilder } from "./graph/codeGraphBuilder.js";
