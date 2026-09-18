@@ -34,3 +34,9 @@ export {
   type SourceAnalysisLogger,
 } from "./analysis/astAnalyzer.js";
 export { CodeGraphBuilder } from "./graph/codeGraphBuilder.js";
+export type {
+  ContextRequest,
+  ContextResult,
+  ContextRetrievalMode,
+} from "./types/context.js";
+export { ContextRetriever } from "./context/contextRetriever.js";
