@@ -4,7 +4,7 @@ RepoLens is a VS Code extension for understanding unfamiliar codebases.
 
 ## Current Status
 
-**Phase 5 — AI Reasoning Boundary**
+**Phase 6 — VS Code AI Interaction Layer**
 
 RepoLens can scan a workspace, analyze TypeScript/JavaScript source structure, and build a deterministic in-memory code graph containing files, symbols, and repository-local import/export/containment relationships.
 
@@ -38,6 +38,8 @@ ContextRetriever
 ReasoningProvider
     ↓
 ReasoningResult
+    ↓
+VS Code Interaction
 
 ## Project Structure
 
@@ -200,3 +202,20 @@ ReasoningRequest contains the user question and retrieved ContextResult. Reasoni
 Phase 5 currently provides DeterministicReasoningProvider, an offline deterministic implementation used to validate the boundary. It does not represent an actual LLM and makes no network calls. The provider consumes the structured context directly; it does not perform graph traversal.
 
 Real LLM integration, RAG, embeddings, semantic search, chat, streaming, persistence, and UI integration remain deferred.
+
+
+## VS Code AI Interaction
+
+Phase 6 adds the first user-facing interaction layer through the **RepoLens: Ask About Code** command.
+
+The command:
+1. accepts a user question through a VS Code input box;
+2. uses the active source file as the context target;
+3. runs the existing repository scanner, source analysis, and code graph pipeline;
+4. retrieves deterministic file context through ContextRetriever;
+5. passes the ContextResult to the ReasoningProvider;
+6. displays the ReasoningResult answer in a RepoLens Output Channel.
+
+The current reasoning implementation remains DeterministicReasoningProvider, so this flow is fully offline and makes no network or LLM calls.
+
+Real LLM providers, semantic retrieval, chat UI, streaming, persistence, agents, and related AI infrastructure remain intentionally deferred.
