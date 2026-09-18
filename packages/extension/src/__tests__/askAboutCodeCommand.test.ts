@@ -63,7 +63,7 @@ test("registers the Ask About Code command", () => {
 test("does not invoke reasoning for an empty question", async () => {
   const testCase = setup("   ");
   await testCase.callback();
-  assert.equal(testCase.askCalls, 0);
+  assert.equal(testCase.getAskCalls(), 0);
 });
 
 test("handles missing workspace and active editor", async () => {
