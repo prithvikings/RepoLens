@@ -6,6 +6,7 @@ function setup(input: string | undefined, workspace = true, editor = true) {
   let callback: (() => Promise<void>) | undefined;
   const messages: string[] = [];
   let askCalls = 0;
+  let shouldFail = false;
   const outputLines: string[] = [];
   const api: AskAboutCodeVscodeApi = {
     commands: {
@@ -27,7 +28,7 @@ function setup(input: string | undefined, workspace = true, editor = true) {
     },
   };
   const service = {
-    ask: async () => { askCalls += 1; return { answer: "answer" }; },
+    ask: async () => { askCalls += 1; if (shouldFail) throw new Error("question failed"); return { answer: "answer" }; },
   } as never;
 
   registerAskAboutCodeCommand(
@@ -36,7 +37,7 @@ function setup(input: string | undefined, workspace = true, editor = true) {
     () => workspace ? { name: "fixture", rootPath: { fsPath: "/workspace" } } as never : undefined,
     service,
   );
-  return { callback: () => callback!(), messages, askCalls, outputLines };
+  return { callback: () => callback!(), messages, outputLines, setShouldFail: () => { shouldFail = true; }, getAskCalls: () => askCalls };
 }
 
 test("registers the Ask About Code command", () => {
@@ -84,7 +85,8 @@ test("displays the reasoning answer through an output channel", async () => {
 
 test("handles question service failures", async () => {
   const testCase = setup("How does this work?");
-  // The command's service is intentionally replaced by a throwing implementation.
-  // This test is covered by the orchestration service's provider-failure test.
-  assert.equal(testCase.askCalls, 0);
+  testCase.setShouldFail();
+  await testCase.callback();
+  assert.equal(testCase.getAskCalls(), 1);
+  assert.deepEqual(testCase.messages, ["RepoLens could not answer the question: question failed"]);
 });
