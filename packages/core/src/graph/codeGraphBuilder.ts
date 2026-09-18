@@ -136,7 +136,16 @@ function symbolNodeId(
 }
 
 function normalizePath(value: string): string {
-  return value.replace(/\\/g, "/").replace(/^\.\//, "");
+  const segments: string[] = [];
+  for (const segment of value.replace(/\\/g, "/").split("/")) {
+    if (!segment || segment === ".") continue;
+    if (segment === "..") {
+      if (segments.length > 0) segments.pop();
+      continue;
+    }
+    segments.push(segment);
+  }
+  return segments.join("/");
 }
 
 function dirname(value: string): string {
