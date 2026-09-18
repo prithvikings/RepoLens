@@ -1,17 +1,22 @@
 import * as vscode from "vscode";
-import type { RepositoryMetadata } from "@repolens/core";
+import type { RepositoryMetadata, SourceFileAnalysis } from "@repolens/core";
 import { getWorkspaceInfo } from "../services/workspaceService.js";
 import { RepositoryScanService } from "../services/repositoryScanService.js";
+import { SourceAnalysisService } from "../services/sourceAnalysisService.js";
 import {
+  formatAnalysisStatus,
   formatConfigurationFiles,
   formatFrameworks,
   formatLanguageStatistics,
+  formatSymbolSummary,
 } from "../services/overviewMetadata.js";
 
 export class OverviewProvider implements vscode.TreeDataProvider<vscode.TreeItem>, vscode.Disposable {
   private readonly emitter = new vscode.EventEmitter<void>();
   private readonly scanService = new RepositoryScanService();
+  private readonly sourceAnalysisService = new SourceAnalysisService();
   private metadata: RepositoryMetadata | undefined;
+  private analyses: SourceFileAnalysis[] | undefined;
   private error: string | undefined;
 
   public readonly onDidChangeTreeData = this.emitter.event;
@@ -35,10 +40,13 @@ export class OverviewProvider implements vscode.TreeDataProvider<vscode.TreeItem
     const metadata = this.metadata;
     if (!metadata) return [this.item("Status", "Scanning…")];
 
+    if (!this.analyses) await this.analyze(metadata);
+    const analyses = this.analyses ?? [];
     const projects = metadata.projects.length
       ? [...new Set(metadata.projects.map(({ type }) => type))].join(" · ")
       : "None detected";
     const packageManagers = [...new Set(metadata.projects.map(({ packageManager }) => packageManager).filter(Boolean))].join(" · ") || "Not detected";
+    const symbolSummary = formatSymbolSummary(analyses);
 
     return [
       this.item("Repository", metadata.name),
@@ -49,13 +57,18 @@ export class OverviewProvider implements vscode.TreeDataProvider<vscode.TreeItem
       this.item("Frameworks", formatFrameworks(metadata.projects)),
       this.item("Package Manager", packageManagers),
       this.item("Configuration", formatConfigurationFiles(metadata.configFiles)),
-      this.item("Status", "Scanned"),
+      this.item("Symbols", String(analyses.flatMap(({ symbols }) => symbols).length)),
+      ...symbolSummary.map((summary) => this.item("  " + summary)),
+      this.item("Imports", String(analyses.reduce((count, analysis) => count + analysis.imports.length, 0))),
+      this.item("Exports", String(analyses.reduce((count, analysis) => count + analysis.exports.length, 0))),
+      this.item("Status", formatAnalysisStatus(analyses)),
     ];
   }
 
   public async refresh(): Promise<void> {
     const workspace = getWorkspaceInfo();
     this.metadata = undefined;
+    this.analyses = undefined;
     this.error = undefined;
     if (workspace) await this.scan(workspace.rootPath.fsPath);
     this.emitter.fire();
@@ -71,9 +84,14 @@ export class OverviewProvider implements vscode.TreeDataProvider<vscode.TreeItem
       this.error = undefined;
     } catch (error) {
       this.metadata = undefined;
+      this.analyses = undefined;
       this.error = error instanceof Error ? error.message : String(error);
       void vscode.window.showErrorMessage(`RepoLens could not scan the workspace: ${this.error}`);
     }
+  }
+
+  private async analyze(metadata: RepositoryMetadata): Promise<void> {
+    this.analyses = await this.sourceAnalysisService.analyze(metadata.files);
   }
 
   private item(label: string, description?: string): vscode.TreeItem {
