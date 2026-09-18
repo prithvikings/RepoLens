@@ -70,8 +70,8 @@ test("retrieves file context with associated symbols and relationships", () => {
   assert.equal(result.found, true);
   assert.deepEqual(ids(result.nodes), [
     "file:src/a.ts",
-    "symbol:src/a.ts:function:A:1:1",
     "file:src/b.ts",
+    "symbol:src/a.ts:function:A:1:1",
   ]);
   assert.deepEqual(result.edges.map(({ kind }) => kind), ["contains", "imports"]);
   assert.deepEqual(result.analyses.map(({ filePath }) => filePath), ["src/a.ts", "src/b.ts"]);
@@ -105,7 +105,7 @@ test("retrieves related nodes without inventing relationships", () => {
     "symbol:src/b.ts:function:B:1:1",
   ]);
   assert.ok(result.edges.some(({ source, target, kind }) =>
-    source === "file:src/b.ts" && target === "file:src/a.ts" && kind === "imports",
+    source === "file:src/a.ts" && target === "file:src/b.ts" && kind === "imports",
   ));
   assert.ok(result.edges.some(({ source, target, kind }) =>
     source === "file:src/b.ts" && target === "file:src/c.ts" && kind === "imports",
